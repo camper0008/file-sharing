@@ -34,8 +34,9 @@ app.get('/', (req, res) => {
 })
 
 app.post('/upload', (req, res) => {
-    if (req.files && req.files.mv) {
-        req.files[0].mv(__dirname + "/user_files/" + req.files[0].name);
+    if (req.files.files.mv) {
+        let file = req.files.files
+        file.mv(__dirname + "/user_files/" + file.name);
     } else if (req.files) {
         let files = req.files.files
         for (file in files) {
