@@ -12,7 +12,7 @@ app.get('/', (req, res) => {
         if (err) throw err;
         let dataString = ""
         for (fileName in data) {
-            dataString += `<li><a href="${data[fileName]}">${data[fileName]}</a></li>`
+            if (fileName !== '.gitkeep') dataString += `<li><a href="${data[fileName]}">${data[fileName]}</a></li>`
         }
         res.send(`
         <!DOCTYPE html>
