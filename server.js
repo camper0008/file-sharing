@@ -11,8 +11,8 @@ app.get('/', (req, res) => {
     fs.readdir('./user_files', (err, data) => {
         if (err) throw err;
         let dataString = ""
-        for (fileName in data) {
-            if (fileName !== '.gitkeep') dataString += `<li><a href="${data[fileName]}">${data[fileName]}</a></li>`
+        for (fileIndex in data) {
+            if (data[fileIndex] !== '.gitkeep') dataString += `<li><a href="${data[fileIndex]}">${data[fileIndex]}</a></li>`
         }
         res.send(`
         <!DOCTYPE html>
