@@ -2,6 +2,8 @@ const express = require('express');
 const fileUpload = require('express-fileupload');
 const app = express();
 
+const PORT = 3500;
+
 app.use('/', express.static(__dirname + '/user_files'))
 app.use(fileUpload());
 
@@ -46,6 +48,6 @@ app.post('/upload', (req, res) => {
     res.send(`<script>window.location.replace('/')</script>`)
 })
 
-app.listen(3500, () => {
-    console.log(`Server started on port 3500.`)
+app.listen(PORT, () => {
+    console.log('Server started on port', PORT)
 })
