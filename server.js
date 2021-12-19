@@ -1,10 +1,13 @@
 const PORT = 3500;
-const USER_FILES = [];
+const fileStorage = [];
 
 const express = require('express');
 const fileUpload = require('express-fileupload');
 const path = require('path');
 
+const isMultipleFiles = (files) => {
+    return Array.isArray(files);
+}
 
 const main = () => {
     const app = express();
@@ -12,17 +15,17 @@ const main = () => {
     app.use('/', express.static(path.join(__dirname, '/public')));
 
     app.get('/filelist', (req, res) => {
-        const filenames = [];
-        for (let i = 0; i < USER_FILES.length; i++)
-            filenames.push(USER_FILES[i].name);
-        res.json({files: filenames})
+        const fileNames = [];
+        for (let i = 0; i < fileStorage.length; i++)
+            fileNames.push(fileStorage[i].name);
+        res.json({files: fileNames})
     });
 
     app.get('/files/:name', (req, res) => {
         const fileName = req.params["name"]
-        for (let i = 0; i < USER_FILES.length; i++) {
-            if (fileName === USER_FILES[i].name) {
-                res.status(200).send(USER_FILES[i].data);
+        for (let i = 0; i < fileStorage.length; i++) {
+            if (fileName === fileStorage[i].name) {
+                res.status(200).send(fileStorage[i].data);
                 return
             }
         }
@@ -32,21 +35,19 @@ const main = () => {
     app.post('/upload', (req, res) => {
         if (req.files === null)
             res.status(400).redirect('/');
-        if (req.files.files.mv) {
+        if (!isMultipleFiles) {
             const file = req.files.files
-            USER_FILES.push({
+            fileStorage.push({
                 name: file.name,
                 data: file.data,
-                mimetype: file.mimetype,
             })
-        } else if (req.files) {
+        } else {
             const files = req.files.files
             for (let i in files) {
                 const file = files[i];
-                USER_FILES.push({
+                fileStorage.push({
                     name: file.name,
                     data: file.data,
-                    mimetype: file.mimetype,
                 })
             }
         }
@@ -54,7 +55,7 @@ const main = () => {
     })
 
     app.post('/clear', (req, res) => {
-        USER_FILES.splice(0, USER_FILES.length);
+        fileStorage.splice(0, fileStorage.length);
         res.status(200).json({msg: "files cleared successfully"})
     })
 
