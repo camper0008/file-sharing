@@ -6,9 +6,9 @@ const MAX_FILENAME_LENGTH = 48;
 
 
 const updateFileView = async () => {
-    fileContainer.innerHTML = "";
     const res = await (await fetch('filelist')).json()
     const files = res.files;
+    fileContainer.innerHTML = "";
     for (let i = 0; i < files.length; i++) {
         const anchor = document.createElement('a');
         anchor.innerText = files[i].length > MAX_FILENAME_LENGTH
