@@ -27,18 +27,18 @@ const uploadInputChanged = () => {
     uploadLabel.innerText = `select files (${uploadInput.files.length} selected)`
 }
 
-const clearInputClick = () => {
-    fetch('clear', {
+const clearInputClick = async () => {
+    await fetch('clear', {
         method: "POST",
     });
     updateFileView();
 }
 
-const main = () => {
+const main = async () => {
     uploadInput.addEventListener('change', () => uploadInputChanged());
     uploadInputChanged();
-    updateFileView();
     clearInput.addEventListener('click', () => clearInputClick());
+    updateFileView();
 }
 
 main();
