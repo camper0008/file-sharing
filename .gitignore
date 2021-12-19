@@ -74,9 +74,3 @@ typings/
 
 # FuseBox cache
 .fusebox/
-
-# dont upload user files
-user_files/*
-
-# keep folder
-!user_files/.gitkeep
