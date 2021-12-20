@@ -3,16 +3,14 @@ const fileStorage = [];
 
 const express = require('express');
 const fileUpload = require('express-fileupload');
-const path = require('path');
+const { join } = require('path');
 
-const isMultipleFiles = (files) => {
-    return Array.isArray(files);
-}
+const isMultipleFiles = (files) => Array.isArray(files);
 
 const main = () => {
     const app = express();
     app.use(fileUpload());
-    app.use('/', express.static(path.join(__dirname, '/public')));
+    app.use('/', express.static(join(__dirname, '/public')));
 
     app.get('/filelist', (req, res) => {
         const fileNames = [];
