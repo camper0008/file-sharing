@@ -77,10 +77,10 @@ const runApp = () => {
     app.use(fileUpload());
     app.use('/', express.static(join(__dirname, '/public')));
 
-    app.get('/filelist', getFileListHandler);
-    app.get('/files/:name', getFileByNameHandler);
-    app.post('/upload', uploadHandler);
-    app.post('/clear', clearHandler);
+    app.get('/api/filelist', getFileListHandler);
+    app.get('/api/files/:name', getFileByNameHandler);
+    app.post('/api/upload', uploadHandler);
+    app.post('/api/clear', clearHandler);
 
     app.listen(PORT, () => console.log('Server started on port', PORT));
 }

@@ -6,7 +6,7 @@ const MAX_FILENAME_LENGTH = 48;
 
 
 const updateFileView = async () => {
-    const res = await (await fetch('filelist')).json()
+    const res = await (await fetch('api/filelist')).json()
     const files = res.files;
     fileContainer.innerHTML = "";
     for (let i = 0; i < files.length; i++) {
@@ -14,7 +14,7 @@ const updateFileView = async () => {
         anchor.innerText = files[i].length > MAX_FILENAME_LENGTH
             ? (files[i].slice(0, MAX_FILENAME_LENGTH - 3) + '...')
             : files[i];
-        anchor.setAttribute('href', `files/${files[i]}`);
+        anchor.setAttribute('href', `api/files/${files[i]}`);
         anchor.setAttribute('download', '');
         anchor.setAttribute('class', 'text interact file');
         if (files[i].length > MAX_FILENAME_LENGTH)
@@ -28,7 +28,7 @@ const uploadInputChanged = () => {
 }
 
 const clearInputClick = async () => {
-    await fetch('clear', {
+    await fetch('api/clear', {
         method: "POST",
     });
     updateFileView();
