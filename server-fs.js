@@ -1,92 +1,94 @@
-// server.js but written using fs rather than storing in memory
-
-const PORT = 3500;
-
 const express = require('express');
 const fileUpload = require('express-fileupload');
-const path = require('path');
-const fs = require('fs/promises');
+const { join } = require('path');
+const { rm, mkdir, readdir, readFile, writeFile } = require('fs/promises');
 
-const folderPath = () => {
-    return path.join(__dirname, './file_storage');
-}
+const folderPath = () => join(__dirname, './file_storage')
 
-const filePath = (filename) => {
-    const folderAndFilePath = path.join(folderPath(), `./${filename}`);
-    return folderAndFilePath;
-}
+const filePath = (filename) => join(folderPath(), `./${filename}`);
+
+const isMultipleFiles = (files) => Array.isArray(files);
 
 const createFolder = async () => {
     try {
-        console.log("Attempting to see if file_storage folder exists.");
-        await fs.readdir(folderPath());
-        console.log("Folder exists.");
+        console.log("Could not find folder, attempting to create folder.");
+        await mkdir(folderPath());
+        console.log("Folder created.");
     } catch {
-        try {
-            console.log("Could not find folder, attempting to create folder.");
-            await fs.mkdir(folderPath());
-            console.log("Folder created.");
-        } catch {
-            console.log("Something went wrong creating file_storage folder.");
-        }
+        console.log("Something went wrong creating file_storage folder.");
     }
 }
 
-const isMultipleFiles = (files) => {
-    return Array.isArray(files);
+const checkFolder = async () => {
+    try {
+        console.log("Attempting to see if file_storage folder exists.");
+        await readdir(folderPath());
+        console.log("Folder exists.");
+    } catch {
+        await createFolder();
+    }
 }
 
-const main = async () => {
-    await createFolder();
+const getFileListHandler = async (req, res) => {
+    const files = await readdir(folderPath())
+    res.json({files})
+}
+
+const getFileByNameHandler = async (req, res) => {
+    const fileName = req.params["name"];
+    try {
+        const bytes = await readFile(filePath(fileName));
+        res.status(200).send(bytes);
+    } catch (err) {
+        res.status(500).send("Something went wrong reading file.")
+    }
+}
+
+const uploadHandler = async (req, res) => {
+    if (req.files === null)
+        res.status(400).redirect('/');
+
+    if (isMultipleFiles(req.files.files)) {
+        const fileArray = req.files.files
+        for (let i in fileArray) {
+            const file = fileArray[i];
+            await writeFile(filePath(file.name), file.data);
+        }
+    } else {
+        const file = req.files.files
+        await writeFile(filePath(file.name), file.data);
+    }
+
+    res.status(200).redirect('/');
+}
+
+const clearHandler = async (req, res) => {
+    const files = await readdir(folderPath())
+    for (let i = 0; i < files.length; i++) {
+        rm(filePath(files[i]));
+    }
+    res.status(200).json({msg: "files cleared successfully"})
+}
+
+const runApp = () => {
+    const PORT = 3500;
 
     const app = express();
     app.use(fileUpload());
-    app.use('/', express.static(path.join(__dirname, '/public')));
+    app.use('/', express.static(join(__dirname, '/public')));
 
-    app.get('/filelist', async (req, res) => {
-        const files = await fs.readdir(folderPath())
-        res.json({files})
-    });
+    app.get('/filelist', getFileListHandler);
+    app.get('/files/:name', getFileByNameHandler);
+    app.post('/upload', uploadHandler);
+    app.post('/clear', clearHandler);
 
-    app.get('/files/:name', async (req, res) => {
-        const fileName = req.params["name"];
-        try {
-            const bytes = await fs.readFile(filePath(fileName));
-            res.status(200).send(bytes);
-        } catch (err) {
-            res.status(500).send("Something went wrong reading file.")
-        }
-    });
+    app.listen(PORT, () => console.log('Server started on port', PORT));
+}
 
-    app.post('/upload', async (req, res) => {
-        if (req.files === null)
-            res.status(400).redirect('/');
+const main = async () => {
+    await checkFolder();
 
-        if (isMultipleFiles(req.files.files)) {
-            const fileArray = req.files.files
-            for (let i in fileArray) {
-                const file = fileArray[i];
-                await fs.writeFile(filePath(file.name), file.data);
-            }
-        } else {
-            const file = req.files.files
-            await fs.writeFile(filePath(file.name), file.data);
-        }
-
-        res.status(200).redirect('/');
-    })
-
-    app.post('/clear', async (req, res) => {
-        const files = await fs.readdir(folderPath())
-        for (let i = 0; i < files.length; i++) {
-            fs.rm(filePath(files[i]));
-        }
-        res.status(200).json({msg: "files cleared successfully"})
-    })
-
-    app.listen(PORT, () => {
-        console.log('Server started on port', PORT)
-    })
+    runApp();
 }
 
 main();
