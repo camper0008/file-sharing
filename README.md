@@ -1,4 +1,6 @@
 # file-sharing
 simple file sharing express server
-saves your files in memory as data buffers which are sent on request to `files/:filename`
+
+uploaded files can be saved in memory (server-memory.js) or on disk (server-fs.js)
+
 frontend for uploading and downloading
